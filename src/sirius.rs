@@ -30,7 +30,10 @@
 //! with the current Sirius values, so a new build or ini moves clients over.
 
 use base::config::keys;
-use hbb_common::config::{self, Config};
+use hbb_common::{
+    config::{self, Config},
+    log,
+};
 use std::collections::HashMap;
 
 const fn or_empty(v: Option<&'static str>) -> &'static str {

@@ -86,6 +86,17 @@ void showServerSettingsWithValue(
     apiServerMsg,
   ];
 
+  // SiriusDesk: "Sirius server" / "Custom settings" (corporate or public servers).
+  final siriusConfig = ServerConfig.sirius();
+  final useSirius = (siriusConfig != null &&
+          serverConfig.idServer.trim() == siriusConfig.idServer.trim())
+      .obs;
+  if (useSirius.value) {
+    for (final c in controllers) {
+      c.text = '';
+    }
+  }
+
   dialogManager.show((setState, close, context) {
     Future<bool> submit() async {
       setState(() {
@@ -93,12 +104,14 @@ void showServerSettingsWithValue(
       });
       bool ret = await setServerConfig(
           null,
-          errMsgs,
-          ServerConfig(
-              idServer: idCtrl.text.trim(),
-              relayServer: relayCtrl.text.trim(),
-              apiServer: apiCtrl.text.trim(),
-              key: keyCtrl.text.trim()));
+          useSirius.value ? null : errMsgs,
+          useSirius.value
+              ? siriusConfig!
+              : ServerConfig(
+                  idServer: idCtrl.text.trim(),
+                  relayServer: relayCtrl.text.trim(),
+                  apiServer: apiCtrl.text.trim(),
+                  key: keyCtrl.text.trim()));
       setState(() {
         isInProgress = false;
       });
@@ -144,7 +157,13 @@ void showServerSettingsWithValue(
       title: Row(
         children: [
           Expanded(child: Text(translate('ID/Relay Server'))),
-          ...ServerConfigImportExportWidgets(controllers, errMsgs),
+          Obx(() => useSirius.value
+              ? Offstage()
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children:
+                      ServerConfigImportExportWidgets(controllers, errMsgs),
+                )),
         ],
       ),
       content: ConstrainedBox(
@@ -153,13 +172,59 @@ void showServerSettingsWithValue(
           child: Obx(() => Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  buildField(translate('ID Server'), idCtrl, idServerMsg.value,
-                      autofocus: true),
-                  SizedBox(height: 8),
-                  if (!isIOS && !isWeb) ...[
-                    buildField(translate('Relay Server'), relayCtrl,
-                        relayServerMsg.value),
+                  if (siriusConfig != null) ...[
+                    Row(
+                      children: [
+                        if (isDesktop || isWeb) ...[
+                          SizedBox(
+                            width: 120,
+                            child: Text(translate('sirius-server-mode')),
+                          ),
+                          SizedBox(width: 8),
+                        ],
+                        Expanded(
+                          child: DropdownButton<bool>(
+                            isExpanded: true,
+                            value: useSirius.value,
+                            items: [
+                              DropdownMenuItem(
+                                  value: true,
+                                  child: Text(translate('sirius-server'))),
+                              DropdownMenuItem(
+                                  value: false,
+                                  child:
+                                      Text(translate('sirius-custom-server'))),
+                            ],
+                            onChanged: isInProgress
+                                ? null
+                                : (v) {
+                                    if (v != null) useSirius.value = v;
+                                  },
+                          ),
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        translate(useSirius.value
+                            ? 'sirius-server-tip'
+                            : 'sirius-custom-server-tip'),
+                        style: TextStyle(
+                            fontSize: 12, color: Theme.of(context).hintColor),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                  ],
+                  if (!useSirius.value) ...[
+                    buildField(translate('ID Server'), idCtrl, idServerMsg.value,
+                        autofocus: true),
+                    SizedBox(height: 8),
+                    if (!isIOS && !isWeb) ...[
+                      buildField(translate('Relay Server'), relayCtrl,
+                          relayServerMsg.value),
+                      SizedBox(height: 8),
                   ],
                   buildField(
                     translate('API Server'),
@@ -177,6 +242,7 @@ void showServerSettingsWithValue(
                   ),
                   SizedBox(height: 8),
                   buildField('Key', keyCtrl, ''),
+                  ],
                   if (isInProgress)
                     Padding(
                       padding: EdgeInsets.only(top: 8),

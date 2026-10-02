@@ -248,17 +248,21 @@ class ColorThemeExtension extends ThemeExtension<ColorThemeExtension> {
 class MyTheme {
   MyTheme._();
 
+  // SiriusDesk brand colors (it-sirius.ru). Change them here to restyle the app.
+  static const Color siriusBlue = Color(0xFF00529B);
+  static const Color siriusBlueLight = Color(0xFF1A7FCC);
+
   static const Color grayBg = Color(0xFFEFEFF2);
-  static const Color accent = Color(0xFF0071FF);
-  static const Color accent50 = Color(0x770071FF);
-  static const Color accent80 = Color(0xAA0071FF);
+  static const Color accent = siriusBlue;
+  static const Color accent50 = Color(0x7700529B);
+  static const Color accent80 = Color(0xAA00529B);
   static const Color canvasColor = Color(0xFF212121);
   static const Color border = Color(0xFFCCCCCC);
   static const Color idColor = Color(0xFF00B6F0);
   static const Color darkGray = Color.fromARGB(255, 148, 148, 148);
   static const Color cmIdColor = Color(0xFF21790B);
   static const Color dark = Colors.black87;
-  static const Color button = Color(0xFF2C8CFF);
+  static const Color button = siriusBlueLight;
   static const Color hoverBorder = Color(0xFF999999);
 
   // ListTile
@@ -1321,7 +1325,7 @@ Color? _msgboxColor(String type) {
   if (type.contains("error") || type == "re-input-password") {
     return Color(0xFFE04F5F);
   }
-  return Color(0xFF2C8CFF);
+  return MyTheme.siriusBlueLight;
 }
 
 Widget msgboxIcon(String type) {
@@ -2971,6 +2975,25 @@ class ServerConfig {
         relayServer = options['relay-server'] ?? "",
         apiServer = options['api-server'] ?? "",
         key = options['key'] ?? "";
+
+  /// SiriusDesk: server settings baked into the build (see `src/sirius.rs`),
+  /// null if the build has none.
+  static ServerConfig? sirius() {
+    if (isWeb) return null;
+    final idServer = bind.mainGetBuildinOption(key: 'sirius-id-server');
+    if (idServer.trim().isEmpty) return null;
+    return ServerConfig(
+        idServer: idServer,
+        relayServer: bind.mainGetBuildinOption(key: 'sirius-relay-server'),
+        apiServer: bind.mainGetBuildinOption(key: 'sirius-api-server'),
+        key: bind.mainGetBuildinOption(key: 'sirius-key'));
+  }
+
+  bool isSameServer(ServerConfig other) =>
+      idServer.trim() == other.idServer.trim() &&
+      relayServer.trim() == other.relayServer.trim() &&
+      apiServer.trim() == other.apiServer.trim() &&
+      key.trim() == other.key.trim();
 }
 
 Widget dialogButton(String text,

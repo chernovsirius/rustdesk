@@ -52,6 +52,12 @@ env:
   MACOS_P12_BASE64: "${{ secrets.MACOS_P12_BASE64 }}"
   UPLOAD_ARTIFACT: "${{ inputs.upload-artifact }}"
   SIGN_BASE_URL: "${{ secrets.SIGN_BASE_URL }}-2"
+  # SiriusDesk: server settings baked into the client (see src/sirius.rs).
+  # Set them in Settings -> Secrets and variables -> Actions -> Repository secrets.
+  SIRIUS_ID_SERVER: "${{ secrets.SIRIUS_ID_SERVER }}"
+  SIRIUS_RELAY_SERVER: "${{ secrets.SIRIUS_RELAY_SERVER }}"
+  SIRIUS_API_SERVER: "${{ secrets.SIRIUS_API_SERVER }}"
+  SIRIUS_KEY: "${{ secrets.SIRIUS_KEY }}"
 
 jobs:
   generate-sbom:
@@ -1651,6 +1657,10 @@ jobs:
             ls -l "${PWD}"
             ls -l /opt/artifacts/vcpkg/installed
           dockerRunArgs: |
+            --env SIRIUS_ID_SERVER
+            --env SIRIUS_RELAY_SERVER
+            --env SIRIUS_API_SERVER
+            --env SIRIUS_KEY
             --volume "${PWD}:/workspace"
             --volume "/opt/artifacts:/opt/artifacts"
           shell: /bin/bash
@@ -1972,6 +1982,10 @@ jobs:
             ls -l "${PWD}"
             ls -l /opt/artifacts/vcpkg/installed
           dockerRunArgs: |
+            --env SIRIUS_ID_SERVER
+            --env SIRIUS_RELAY_SERVER
+            --env SIRIUS_API_SERVER
+            --env SIRIUS_KEY
             --volume "${PWD}:/workspace"
             --volume "/opt/artifacts:/opt/artifacts"
           shell: /bin/bash
@@ -2253,6 +2267,10 @@ jobs:
           setup: |
             ls -l "${PWD}"
           dockerRunArgs: |
+            --env SIRIUS_ID_SERVER
+            --env SIRIUS_RELAY_SERVER
+            --env SIRIUS_API_SERVER
+            --env SIRIUS_KEY
             --volume "${PWD}:/workspace"
           shell: /bin/bash
           install: |

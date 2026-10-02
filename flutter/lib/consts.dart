@@ -193,6 +193,7 @@ const String kOptionShowTerminalCtrlKeys = "show-terminal-extra-ctrl-keys";
 
 // network options
 const String kOptionAllowWebSocket = "allow-websocket";
+const String kOptionSiriusServerMode = "sirius-server-mode";
 const String kOptionAllowInsecureTLSFallback = "allow-insecure-tls-fallback";
 const String kOptionDisableUdp = "disable-udp";
 const String kOptionEnableFlutterHttpOnRust = "enable-flutter-http-on-rust";

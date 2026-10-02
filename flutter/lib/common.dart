@@ -2976,7 +2976,7 @@ class ServerConfig {
         apiServer = options['api-server'] ?? "",
         key = options['key'] ?? "";
 
-  /// SiriusDesk: server settings baked into the build (see `src/sirius.rs`),
+  /// SiriusDesk: server settings baked into the build or from sirius.ini (see `src/sirius.rs`),
   /// null if the build has none.
   static ServerConfig? sirius() {
     if (isWeb) return null;

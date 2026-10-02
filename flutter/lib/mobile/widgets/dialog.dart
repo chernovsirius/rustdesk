@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_hbb/common/widgets/setting_widgets.dart';
+import 'package:flutter_hbb/consts.dart';
 import 'package:flutter_hbb/common/widgets/toolbar.dart';
 import 'package:get/get.dart';
 
@@ -88,8 +89,12 @@ void showServerSettingsWithValue(
 
   // SiriusDesk: "Sirius server" / "Custom settings" (corporate or public servers).
   final siriusConfig = ServerConfig.sirius();
+  final siriusMode = bind.mainGetOptionSync(key: kOptionSiriusServerMode);
   final useSirius = (siriusConfig != null &&
-          serverConfig.idServer.trim() == siriusConfig.idServer.trim())
+          (siriusMode == 'Y' ||
+              (siriusMode.isEmpty &&
+                  serverConfig.idServer.trim() ==
+                      siriusConfig.idServer.trim())))
       .obs;
   if (useSirius.value) {
     for (final c in controllers) {
@@ -102,6 +107,12 @@ void showServerSettingsWithValue(
       setState(() {
         isInProgress = true;
       });
+      // Before the server options, so the service does not restore the
+      // Sirius server over the user's custom settings.
+      if (siriusConfig != null) {
+        await bind.mainSetOption(
+            key: kOptionSiriusServerMode, value: useSirius.value ? 'Y' : 'N');
+      }
       bool ret = await setServerConfig(
           null,
           useSirius.value ? null : errMsgs,

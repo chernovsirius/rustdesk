@@ -58,6 +58,9 @@ env:
   SIRIUS_RELAY_SERVER: "${{ secrets.SIRIUS_RELAY_SERVER }}"
   SIRIUS_API_SERVER: "${{ secrets.SIRIUS_API_SERVER }}"
   SIRIUS_KEY: "${{ secrets.SIRIUS_KEY }}"
+  # Windows app name: service, install dir, config dir; must match [a-zA-Z0-9-]+.
+  # Override in Settings -> Secrets and variables -> Actions -> Variables.
+  SIRIUS_APP_NAME: "${{ vars.SIRIUS_APP_NAME || 'SRSDesk' }}"
 
 jobs:
   generate-sbom:
@@ -393,8 +396,12 @@ jobs:
         # is x64 / ARM64; the produced Package.msi is globbed since its bin/<platform>/ dir varies.
         if: env.UPLOAD_ARTIFACT == 'true'
         run: |
+          # preprocess.py looks for <app-name>.exe, so build from a renamed copy.
+          Remove-Item -Recurse -Force ./rustdesk-msi-src -ErrorAction SilentlyContinue
+          cp -r ./rustdesk ./rustdesk-msi-src
+          mv ./rustdesk-msi-src/rustdesk.exe "./rustdesk-msi-src/$env:SIRIUS_APP_NAME.exe"
           pushd ./res/msi
-          python preprocess.py --arp -d ../../rustdesk
+          python preprocess.py --arp -d ../../rustdesk-msi-src --app-name $env:SIRIUS_APP_NAME
           nuget restore msi.sln
           $msiPlatform = if ('${{ matrix.job.arch }}' -eq 'aarch64') { 'ARM64' } else { 'x64' }
           msbuild msi.sln -p:Configuration=Release -p:Platform=$msiPlatform /p:TargetVersion=Windows10

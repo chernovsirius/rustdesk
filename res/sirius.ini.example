@@ -1,0 +1,7 @@
+; Put next to the executable as sirius.ini (macOS: SRSDesk.app/Contents/Resources/).
+; Overrides the server settings baked in at build time.
+[server]
+id_server = desk.example.com
+relay_server =
+api_server = https://desk.example.com
+key = 
